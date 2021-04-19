@@ -6,8 +6,9 @@ import java.util.Scanner;
 public class Banker {
     ArrayList<Process> processes = new ArrayList<Process>();
     ArrayList<Process> safeSequence = new ArrayList<Process>();
+    ArrayList<Resource> workRecord = new ArrayList<Resource>();
     private Resource systemAvailable = new Resource();
-    private int processesCount;
+    private final int processesCount;
 
     public Banker() {
         Scanner sc = new Scanner(System.in);
@@ -19,7 +20,6 @@ public class Banker {
         processesCount = sc.nextInt();
 
         for (int i = 0; i < processesCount; i++) {
-            int[] maximum = new int[3];
             System.out.println("Enter process name:");
             sc.nextLine();
             Process process = new Process(sc.nextLine());
@@ -33,6 +33,8 @@ public class Banker {
 
             processes.add(process);
         }
+
+        sc.close();
     }
 
     public Banker(Resource systemAvailable, ArrayList<Process> processList) {
@@ -47,8 +49,10 @@ public class Banker {
             int index = 0;
             while(index != processesCount){
                 if(processes.get(index).getNeed().compareTo(systemAvailable) > 0){
+                    workRecord.add(new Resource(systemAvailable.getRes()));
                     safeSequence.add(processes.get(index));
                     systemAvailable.setRes(systemAvailable.add(processes.get(index).getAllocated()));
+
                     processes.remove(index);
                     found = true;
                     break;
