@@ -27,7 +27,7 @@ public class Banker {
             System.out.println("Enter process MAX matrix:");
             process.setProcessMaximum(sc);
 
-            System.out.println("Enter process ALLO matrix:");
+            System.out.println("Enter process ALLOC matrix:");
             process.setProcessAllocated(sc);
             systemAvailable.setRes(systemAvailable.minus(process.getAllocated()));
 
@@ -62,7 +62,7 @@ public class Banker {
                 }
             }
             if (!found){
-                throw new Exception("Can't find safe sequence");
+                throw new RuntimeException("Can't find safe sequence");
             }
 
         }

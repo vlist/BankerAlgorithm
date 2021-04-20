@@ -7,24 +7,18 @@ public class Main {
         Banker banker = new Banker();
         try {
             ArrayList<Process> safe = banker.buildSafeSequence();
-            System.out.println("Name\tWork\tNeed\tAlloc\tWork+Alloc");
+            System.out.println("PID\t\tName\tWork\tNeed\tAlloc\tWork+Alloc");
 
             for (int index = 0; index < safe.size(); index++) {
 
-                String sb = safe.get(index).getName() + "\t\t" +
+                String sb = safe.get(index).getPid() + "\t" +
+                        safe.get(index).getName() + "\t\t" +
                         banker.workRecord.get(index) + '\t' +
                         safe.get(index).getNeed() + '\t' +
                         safe.get(index).getAllocated() + '\t' +
                         safe.get(index).getAllocated().add(banker.workRecord.get(index)) + '\t';
                 System.out.println(sb);
             }
-
-            /*
-            for (Process p : safe) {
-                System.out.print(p.toString() + " \n");
-            }
-            */
-
 
         } catch (Exception e) {
             System.out.println(e.toString());

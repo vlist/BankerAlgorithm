@@ -3,11 +3,19 @@ package com.vlist;
 import java.util.Scanner;
 
 public class Process {
-    private final String name;
-    private final Resource maximum;
-    private final Resource allocated;
+    private static int globalPid = 1000;
+    private String name;
+    private Resource maximum;
+    private Resource allocated;
+    private final int pid;
+
+    public Process(){
+        this.pid = globalPid;
+        globalPid++;
+    }
 
     public Process(String name, Resource maximum, Resource allocated) {
+        this();
         this.name = name;
         this.maximum = maximum;
         this.allocated = allocated;
@@ -47,6 +55,10 @@ public class Process {
 
     public void setProcessAllocated(int A, int B, int C) {
         maximum.setRes(A,B,C);
+    }
+
+    public int getPid() {
+        return pid;
     }
 
     @Override
