@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Banker {
-    ArrayList<Process> processes = new ArrayList<Process>();
-    ArrayList<Process> safeSequence = new ArrayList<Process>();
-    ArrayList<Resource> workRecord = new ArrayList<Resource>();
+    private ArrayList<Process> processes = new ArrayList<Process>();
+    private ArrayList<Process> safeSequence = new ArrayList<Process>();
+    private ArrayList<Resource> workRecord = new ArrayList<Resource>();
     private Resource systemAvailable = new Resource();
-    private final int processesCount;
+    private int processesCount;
 
     public Banker() {
         Scanner sc = new Scanner(System.in);
@@ -34,39 +34,84 @@ public class Banker {
             processes.add(process);
         }
 
-        sc.close();
     }
 
-    public Banker(Resource systemAvailable, ArrayList<Process> processList) {
-        this.systemAvailable = systemAvailable;
-        this.processes = processList;
-        processesCount = processes.size();
-    }
+    public void buildSafeSequence() throws Exception {
+        ArrayList<Process> unchecked = new ArrayList<Process>(processes);
 
-    public ArrayList<Process> buildSafeSequence() throws Exception {
-        while (!this.processes.isEmpty()) {
-            boolean found = false;
-            int index = 0;
-            while(index != processesCount){
-                if(processes.get(index).getNeed().compareTo(systemAvailable) > 0){
-                    workRecord.add(new Resource(systemAvailable.getRes()));
-                    safeSequence.add(processes.get(index));
-                    systemAvailable.setRes(systemAvailable.add(processes.get(index).getAllocated()));
-
-                    processes.remove(index);
-                    found = true;
+        if (!safeSequence.isEmpty()) {
+            for (Process i : unchecked) {
+                if (i.getName().equals(safeSequence.get(0).getName())) {
+                    unchecked.remove(i);
                     break;
                 }
-                else{
-                    index ++;
+            }
+        }
+
+        processesCount = unchecked.size();
+        while (!unchecked.isEmpty()) {
+            boolean found = false;
+            int index = 0;
+            while (index != processesCount) {
+                if (unchecked.get(index).getNeed().compareTo(systemAvailable) > 0) {
+                    workRecord.add(new Resource(systemAvailable.getRes()));
+                    safeSequence.add(unchecked.get(index));
+                    systemAvailable.setRes(systemAvailable.add(unchecked.get(index).getAllocated()));
+
+                    unchecked.remove(index);
+                    found = true;
+                    break;
+                } else {
+                    index++;
                 }
             }
-            if (!found){
+            if (!found) {
                 throw new RuntimeException("Can't find safe sequence");
             }
-
         }
+
+    }
+
+
+    public void RequestReceiver(int index) throws Exception {
+        if (!workRecord.isEmpty()) {
+            systemAvailable.setRes(workRecord.get(0).getRes());
+        }
+        safeSequence.clear();
+        workRecord.clear();
+
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter request matrix");
+        Resource request = new Resource(sc.nextInt(), sc.nextInt(), sc.nextInt());
+
+        if (request.compareTo(processes.get(index).getNeed()) <= 0) {
+            throw new RuntimeException(
+                    "Process " + processes.get(index).getName() +
+                            "(PID:" + (index + 1000) + ')' +
+                            " request more than need");
+        }
+
+        if (request.compareTo(systemAvailable) <= 0) {
+            throw new RuntimeException(
+                    "Process " + processes.get(index).getName() +
+                            "(PID:" + (index + 1000) + ')' +
+                            "BLOCKED");
+        }
+        processes.get(index).getAllocated().setRes(processes.get(index).getAllocated().add(request));
+        systemAvailable.setRes(systemAvailable.minus(request));
+
+        safeSequence.add(processes.get(index));
+
+        workRecord.add(new Resource(systemAvailable.getRes()));
+        systemAvailable.setRes(systemAvailable.add(processes.get(index).getAllocated()));
+    }
+
+    public ArrayList<Process> getSafeSequence() {
         return safeSequence;
+    }
+
+    public ArrayList<Resource> getWorkRecord() {
+        return workRecord;
     }
 
     public ArrayList<Process> getProcesses() {
